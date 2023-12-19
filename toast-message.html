@@ -1,1 +1,100 @@
 
+document.addEventListener('DOMContentLoaded',()=>{
+    this?.addCitiesOptions();
+    this?.addInfoElements();
+})
+
+
+Array.from(document.getElementsByTagName("input")).forEach((ele)=>{
+    ele?.addEventListener('blur',(event)=>{             
+          this.addRemoveErrorHandlers(event);
+    });
+
+    ele.addEventListener('input',(event)=>{
+        this.addRemoveErrorHandlers(event)
+    })
+})
+
+
+function addRemoveErrorHandlers(event){    
+    let {target:element,target:{parentNode:parent}} = event;    
+    this?.removeErrors(element);
+    if(!element?.value){
+        parent?.appendChild(createErrorElement(element));
+        this.updateClasses(false,element);            
+    }else{        
+        this.updateClasses(true,event?.target);
+    }  
+}
+
+function removeErrors(element){
+    Array.from(element?.parentNode?.querySelectorAll('.error-msg')).forEach(ele=>ele?.remove());
+}
+
+function createErrorElement(element){
+    let errorElement = document?.createElement('span');
+    errorElement.innerText = `please enter value for ${element?.id}`;
+    errorElement.classList.add('error-msg');
+    return errorElement;    
+}
+
+document.getElementsByTagName("form")[0].addEventListener('submit',(event)=>{
+    this.handleFormSubmitEvent(event);
+});
+
+
+function updateClasses(isValid,element){
+    element?.classList.remove('invalid-field','valid-field')
+    if(isValid){
+        element?.classList?.add('valid-field')
+    }else{
+        element?.classList?.add('invalid-field')
+    }
+
+}
+
+function addCitiesOptions(){
+    let cities = ['Delhi','Gurugram','Vaishali','Noida','Ghaziabad','Bhopal','Chennai','J&K'];
+    let citiesDropdown = document?.getElementById('city');
+    for(let city of cities){
+        let option = document?.createElement('option');
+        option.innerHTML = city;
+        option?.setAttribute("value",city?.toLowerCase());
+        citiesDropdown?.appendChild(option)
+    }
+}
+
+
+function handleFormSubmitEvent(event){
+    let canSubmit = true;    
+    let formData = new FormData(event.target);
+    let entries = Object.fromEntries(formData);
+    entries = {...entries,tech:formData?.getAll("tech")};
+    for(let [key,value] of Object?.entries(entries)){
+        let formElement = document.getElementById(key);                        
+        if(!formData?.get(key)){                  
+                formElement?.focus();
+                this?.updateClasses(false,formElement);
+                canSubmit = false;
+                break;
+        }
+        else{
+            this?.updateClasses(true,formElement);
+        }
+    }
+    if(!canSubmit){
+        event.preventDefault();
+    }
+}
+
+
+function addInfoElements(element){    
+    let elements = Array.from(document?.querySelectorAll("input[type='text'],input[type='email']"));
+    elements?.forEach(element=>{
+        let span = document.createElement('span');
+        span.classList.add('info-msg');
+        span.innerHTML = `Allowed values ${element.dataset.allowedvalues}`;
+        element.parentNode.appendChild(span);       
+    })      
+    
+}
